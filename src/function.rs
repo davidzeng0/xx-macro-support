@@ -11,10 +11,22 @@ impl VisitMut for RemoveRefMut {
 	}
 }
 
-pub fn get_args(sig: &Signature, include_receiver: bool) -> Punctuated<Expr, Token![,]> {
+#[must_use]
+pub fn get_return_type(ret: &ReturnType) -> TokenStream {
+	if let ReturnType::Type(_, ty) = ret {
+		quote! { #ty }
+	} else {
+		quote! { () }
+	}
+}
+
+#[must_use]
+pub fn get_args(
+	inputs: &Punctuated<FnArg, Token![,]>, include_receiver: bool
+) -> Punctuated<Expr, Token![,]> {
 	let mut args = Punctuated::new();
 
-	for arg in sig.inputs.iter() {
+	for arg in inputs {
 		match arg {
 			FnArg::Typed(arg) => {
 				let mut pat = arg.pat.as_ref().clone();
@@ -24,13 +36,13 @@ pub fn get_args(sig: &Signature, include_receiver: bool) -> Punctuated<Expr, Tok
 				args.push(parse_quote! { #pat });
 			}
 
-			FnArg::Receiver(rec) if include_receiver => {
-				let token = &rec.self_token;
+			FnArg::Receiver(rec) => {
+				if include_receiver {
+					let token = &rec.self_token;
 
-				args.push(parse_quote! { #token });
+					args.push(parse_quote! { #token });
+				}
 			}
-
-			_ => {}
 		}
 	}
 

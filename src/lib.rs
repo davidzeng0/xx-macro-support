@@ -1,5 +1,6 @@
-use quote::ToTokens;
-use syn::{parse::Parser, punctuated::Punctuated, visit_mut::*, *};
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens};
+use syn::{punctuated::Punctuated, visit_mut::*, *};
 
 pub mod attribute;
 pub mod function;
