@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn visit_macro_punctuated_exprs<V>(v: &mut V, mac: &mut Macro)
+pub fn visit_macro_body<V>(v: &mut V, mac: &mut Macro)
 where
 	V: VisitMut
 {
@@ -21,7 +21,7 @@ where
 		Punctuated::<Expr, Token![,]>::parse_terminated,
 		|mut exprs: Punctuated<Expr, Token![,]>| {
 			for expr in &mut exprs {
-				visit_expr_mut(v, expr);
+				v.visit_expr_mut(expr);
 			}
 
 			exprs.to_token_stream()
@@ -30,7 +30,7 @@ where
 
 	try_parse!(Block::parse_within, |mut stmts: Vec<Stmt>| {
 		for stmt in &mut stmts {
-			visit_stmt_mut(v, stmt);
+			v.visit_stmt_mut(stmt);
 		}
 
 		quote! { #(#stmts)* }
