@@ -1,8 +1,8 @@
 use super::*;
 
-pub struct RemoveRefMut;
+pub struct RemoveModifiers;
 
-impl VisitMut for RemoveRefMut {
+impl VisitMut for RemoveModifiers {
 	fn visit_pat_ident_mut(&mut self, ident: &mut PatIdent) {
 		visit_pat_ident_mut(self, ident);
 
@@ -31,7 +31,7 @@ pub fn get_args(
 			FnArg::Typed(arg) => {
 				let mut pat = arg.pat.as_ref().clone();
 
-				RemoveRefMut {}.visit_pat_mut(&mut pat);
+				RemoveModifiers {}.visit_pat_mut(&mut pat);
 
 				args.push(parse_quote! { #pat });
 			}

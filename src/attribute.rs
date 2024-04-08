@@ -18,11 +18,11 @@ pub fn remove_attr_path(attrs: &mut Vec<Attribute>, target: &str) -> Option<Attr
 	remove_attr_kind(attrs, target, |meta| matches!(meta, Meta::Path(_)))
 }
 
-pub fn remove_attr_name_value(attrs: &mut Vec<Attribute>, target: &str) -> Option<Expr> {
+pub fn remove_attr_name_value(attrs: &mut Vec<Attribute>, target: &str) -> Option<MetaNameValue> {
 	let attr = remove_attr_kind(attrs, target, |meta| matches!(meta, Meta::NameValue(_)))?;
 
 	Some(match attr.meta {
-		Meta::NameValue(nv) => nv.value,
+		Meta::NameValue(nv) => nv,
 		_ => unreachable!()
 	})
 }
