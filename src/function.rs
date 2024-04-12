@@ -12,11 +12,11 @@ impl VisitMut for RemoveModifiers {
 }
 
 #[must_use]
-pub fn get_return_type(ret: &ReturnType) -> TokenStream {
+pub fn get_return_type(ret: &ReturnType) -> Type {
 	if let ReturnType::Type(_, ty) = ret {
-		quote! { #ty }
+		ty.as_ref().clone()
 	} else {
-		quote! { () }
+		parse_quote! { () }
 	}
 }
 
