@@ -13,8 +13,13 @@ where
 }
 
 #[must_use]
-pub fn error_to_tokens<R: Parse>(error: Error) -> R {
-	let error = error.to_compile_error();
+pub fn error_on_tokens<T, M, R>(tokens: T, message: M) -> R
+where
+	T: ToTokens,
+	M: std::fmt::Display,
+	R: Parse
+{
+	let error = Error::new_spanned(tokens, message).to_compile_error();
 
 	parse_quote! { #error }
 }
