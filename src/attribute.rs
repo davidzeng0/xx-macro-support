@@ -35,3 +35,11 @@ pub fn remove_attr_list(attrs: &mut Vec<Attribute>, target: &str) -> Option<Meta
 		_ => unreachable!()
 	})
 }
+
+pub fn ensure_empty(attr: TokenStream) -> Result<()> {
+	if attr.is_empty() {
+		Ok(())
+	} else {
+		Err(Error::new_spanned(attr, "Unexpected tokens"))
+	}
+}

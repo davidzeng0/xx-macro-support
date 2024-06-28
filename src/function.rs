@@ -4,8 +4,6 @@ pub struct RemoveModifiers;
 
 impl VisitMut for RemoveModifiers {
 	fn visit_pat_ident_mut(&mut self, ident: &mut PatIdent) {
-		visit_pat_ident_mut(self, ident);
-
 		ident.by_ref = None;
 		ident.mutability = None;
 	}
