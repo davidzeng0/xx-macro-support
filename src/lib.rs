@@ -1,3 +1,5 @@
+#![allow(clippy::wildcard_imports)]
+
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use syn::parse::Parse;
 
 use super::*;
@@ -16,7 +18,7 @@ where
 pub fn error_on_tokens<T, M, R>(tokens: T, message: M) -> R
 where
 	T: ToTokens,
-	M: std::fmt::Display,
+	M: Display,
 	R: Parse
 {
 	let error = Error::new_spanned(tokens, message).to_compile_error();

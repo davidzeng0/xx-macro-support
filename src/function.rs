@@ -29,7 +29,7 @@ pub fn get_args(
 			FnArg::Typed(arg) => {
 				let mut pat = arg.pat.as_ref().clone();
 
-				RemoveModifiers {}.visit_pat_mut(&mut pat);
+				RemoveModifiers.visit_pat_mut(&mut pat);
 
 				args.push(parse_quote! { #pat });
 			}
