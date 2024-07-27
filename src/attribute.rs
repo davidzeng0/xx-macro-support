@@ -1,45 +1,51 @@
 use super::*;
 
-pub fn remove_attr_kind(
-	attrs: &mut Vec<Attribute>, target: &str, kind_match: impl Fn(&Meta) -> bool
-) -> Option<Attribute> {
-	let index = attrs.iter().position(|attr| {
-		if !kind_match(&attr.meta) {
-			return false;
-		}
+sealed_trait!(Attributes);
 
-		attr.path().get_ident().is_some_and(|ident| ident == target)
-	})?;
+pub trait AttributesExt: AttributesSealed {
+	fn remove_if(&mut self, target: &str, kind_match: impl Fn(&Meta) -> bool) -> Option<Attribute>;
 
-	Some(attrs.remove(index))
+	fn remove_path(&mut self, target: &str) -> Option<Attribute>;
+
+	fn remove_name_value(&mut self, target: &str) -> Option<MetaNameValue>;
+
+	fn remove_list(&mut self, target: &str) -> Option<MetaList>;
 }
 
-pub fn remove_attr_path(attrs: &mut Vec<Attribute>, target: &str) -> Option<Attribute> {
-	remove_attr_kind(attrs, target, |meta| matches!(meta, Meta::Path(_)))
-}
+impl AttributesSealed for Vec<Attribute> {}
 
-pub fn remove_attr_name_value(attrs: &mut Vec<Attribute>, target: &str) -> Option<MetaNameValue> {
-	let attr = remove_attr_kind(attrs, target, |meta| matches!(meta, Meta::NameValue(_)))?;
+impl AttributesExt for Vec<Attribute> {
+	fn remove_if(&mut self, target: &str, kind_match: impl Fn(&Meta) -> bool) -> Option<Attribute> {
+		let index = self.iter().position(|attr| {
+			if !kind_match(&attr.meta) {
+				return false;
+			}
 
-	Some(match attr.meta {
-		Meta::NameValue(nv) => nv,
-		_ => unreachable!()
-	})
-}
+			attr.path().get_ident().is_some_and(|ident| ident == target)
+		})?;
 
-pub fn remove_attr_list(attrs: &mut Vec<Attribute>, target: &str) -> Option<MetaList> {
-	let attr = remove_attr_kind(attrs, target, |meta| matches!(meta, Meta::List(_)))?;
+		Some(self.remove(index))
+	}
 
-	Some(match attr.meta {
-		Meta::List(list) => list,
-		_ => unreachable!()
-	})
-}
+	fn remove_path(&mut self, target: &str) -> Option<Attribute> {
+		self.remove_if(target, |meta| matches!(meta, Meta::Path(_)))
+	}
 
-pub fn ensure_empty(attr: TokenStream) -> Result<()> {
-	if attr.is_empty() {
-		Ok(())
-	} else {
-		Err(Error::new_spanned(attr, "Unexpected tokens"))
+	fn remove_name_value(&mut self, target: &str) -> Option<MetaNameValue> {
+		let attr = self.remove_if(target, |meta| matches!(meta, Meta::NameValue(_)))?;
+
+		Some(match attr.meta {
+			Meta::NameValue(nv) => nv,
+			_ => unreachable!()
+		})
+	}
+
+	fn remove_list(&mut self, target: &str) -> Option<MetaList> {
+		let attr = self.remove_if(target, |meta| matches!(meta, Meta::List(_)))?;
+
+		Some(match attr.meta {
+			Meta::List(list) => list,
+			_ => unreachable!()
+		})
 	}
 }

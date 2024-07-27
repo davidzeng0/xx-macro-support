@@ -9,40 +9,57 @@ impl VisitMut for RemoveModifiers {
 	}
 }
 
-#[must_use]
-pub fn get_return_type(ret: &ReturnType) -> Type {
-	if let ReturnType::Type(_, ty) = ret {
-		ty.as_ref().clone()
-	} else {
-		parse_quote! { () }
+sealed_trait!(ReturnType);
+
+pub trait ReturnTypeExt: ReturnTypeSealed {
+	fn to_type(&self) -> Type;
+}
+
+impl ReturnTypeSealed for ReturnType {}
+
+impl ReturnTypeExt for ReturnType {
+	fn to_type(&self) -> Type {
+		if let Self::Type(_, ty) = self {
+			ty.as_ref().clone()
+		} else {
+			parse_quote! { () }
+		}
 	}
 }
 
-#[must_use]
-pub fn get_args(
-	inputs: &Punctuated<FnArg, Token![,]>, include_receiver: bool
-) -> Punctuated<Expr, Token![,]> {
-	let mut args = Punctuated::new();
+sealed_trait!(FunctionArgs);
 
-	for arg in inputs {
-		match arg {
-			FnArg::Typed(arg) => {
-				let mut pat = arg.pat.as_ref().clone();
+pub trait FunctionArgsExt: FunctionArgsSealed {
+	fn get_pats(&self, include_receiver: bool) -> Punctuated<Expr, Token![,]>;
+}
 
-				RemoveModifiers.visit_pat_mut(&mut pat);
+impl FunctionArgsSealed for Punctuated<FnArg, Token![,]> {}
 
-				args.push(parse_quote! { #pat });
-			}
+impl FunctionArgsExt for Punctuated<FnArg, Token![,]> {
+	#[must_use]
+	fn get_pats(&self, include_receiver: bool) -> Punctuated<Expr, Token![,]> {
+		let mut args = Punctuated::new();
 
-			FnArg::Receiver(rec) => {
-				if include_receiver {
-					let token = &rec.self_token;
+		for arg in self {
+			match arg {
+				FnArg::Typed(arg) => {
+					let mut pat = arg.pat.as_ref().clone();
 
-					args.push(parse_quote! { #token });
+					RemoveModifiers.visit_pat_mut(&mut pat);
+
+					args.push(parse_quote! { #pat });
+				}
+
+				FnArg::Receiver(rec) => {
+					if include_receiver {
+						let token = &rec.self_token;
+
+						args.push(parse_quote! { #token });
+					}
 				}
 			}
 		}
-	}
 
-	args
+		args
+	}
 }
