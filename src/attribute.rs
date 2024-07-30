@@ -5,6 +5,8 @@ sealed_trait!(Attributes);
 pub trait AttributesExt: AttributesSealed {
 	fn remove_if(&mut self, target: &str, kind_match: impl Fn(&Meta) -> bool) -> Option<Attribute>;
 
+	fn remove_any(&mut self, target: &str) -> Option<Attribute>;
+
 	fn remove_path(&mut self, target: &str) -> Option<Attribute>;
 
 	fn remove_name_value(&mut self, target: &str) -> Option<MetaNameValue>;
@@ -25,6 +27,10 @@ impl AttributesExt for Vec<Attribute> {
 		})?;
 
 		Some(self.remove(index))
+	}
+
+	fn remove_any(&mut self, target: &str) -> Option<Attribute> {
+		self.remove_if(target, |_| true)
 	}
 
 	fn remove_path(&mut self, target: &str) -> Option<Attribute> {
